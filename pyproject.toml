@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nimbus-chain"
+version = "0.1.0"
+description = "A from-scratch blockchain in pure Python: secp256k1 ECDSA, Merkle proofs, a script interpreter, PoW consensus with work-based reorganisation, SPV light client and a tamper-evident notarisation app."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "EAnge1o" }]
+keywords = [
+    "blockchain", "bitcoin", "secp256k1", "ecdsa", "rfc6979", "merkle-proof",
+    "proof-of-work", "spv", "consensus", "reorganisation", "from-scratch",
+    "zero-dependency", "notarisation",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Security :: Cryptography",
+    "Topic :: System :: Distributed Computing",
+    "Intended Audience :: Developers",
+]
+# 零运行时依赖：全部使用 Python 标准库
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+nimbus-chain = "nimbus_chain.cli:main"
+
+[tool.setuptools]
+packages = ["nimbus_chain"]

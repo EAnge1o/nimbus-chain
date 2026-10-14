@@ -1,0 +1,35 @@
+# 字节码缓存与构建产物
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 测试与覆盖率
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# 运行期数据（链文件与钱包，含私钥——绝不提交）
+nimbus-data/
+ci-data/
+*.ndb
+chain.json
+wallet.json
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

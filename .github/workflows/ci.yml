@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 本项目零第三方运行时依赖：没有 pip install 这一步，这本身就是被验证的卖点之一。
+      - name: Show interpreter and confirm no dependencies
+        run: |
+          python --version
+          python -c "import sys; print('stdlib only, no third-party imports required')"
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -t . -v
+
+      - name: Run the self-verifying demo
+        run: python demo.py
+
+      - name: Run the crypto benchmark
+        run: python benchmarks/bench_crypto.py --time 0.1
+
+      - name: Run the PoW benchmark
+        run: python benchmarks/bench_pow.py --time 0.1 --rounds 5
+
+      - name: CLI smoke test
+        run: |
+          python -m nimbus_chain --data-dir ci-data --coinbase-maturity 1 info
+          python -m nimbus_chain --data-dir ci-data --coinbase-maturity 1 address
+          python -m nimbus_chain --data-dir ci-data --coinbase-maturity 1 mine --count 2
+          python -m nimbus_chain --data-dir ci-data --coinbase-maturity 1 notarize --text "ci smoke" --mine
+          python -m nimbus_chain --data-dir ci-data --coinbase-maturity 1 verify --text "ci smoke" --spv
+          python -m nimbus_chain --data-dir ci-data --coinbase-maturity 1 spv
