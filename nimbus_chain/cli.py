@@ -320,8 +320,9 @@ def cmd_serve(args) -> int:
                            config=ExplorerConfig(host=args.host, port=args.port))
     port = server.start()
     url = server.url()
-    print(f"浏览器服务已启动： {url}")
-    print(f"按 Ctrl+C 停止。链文件 {workspace.chain_path}，每次挖矿后会写回。")
+    # flush：URL 必须立刻可见，否则被重定向到日志时用户看不到地址
+    print(f"浏览器服务已启动： {url}", flush=True)
+    print(f"按 Ctrl+C 停止。链文件 {workspace.chain_path}，每次挖矿后会写回。", flush=True)
     if args.open:
         import webbrowser
         webbrowser.open(url)
@@ -354,20 +355,21 @@ def cmd_node(args) -> int:
                               mine_interval=args.interval),
         )
         await node.start()
-        print(f"[{args.name}] 监听 {args.host}:{node.port()}，种子 {seeds or '（无）'}")
-        print(f"[{args.name}] 高度 {node.chain.height}，按 Ctrl+C 停止")
+        print(f"[{args.name}] 监听 {args.host}:{node.port()}，种子 {seeds or '（无）'}", flush=True)
+        print(f"[{args.name}] 高度 {node.chain.height}，按 Ctrl+C 停止", flush=True)
         try:
             while True:
                 await asyncio.sleep(1)
                 chain = node.chain
+                # flush：输出被重定向到文件/管道时，块缓冲会让状态行"看不到"
                 print(f"[{args.name}] 高度 {chain.height}  对等体 {node.p2p.peer_count}  "
-                      f"交易池 {len(node.mempool)}  UTXO {len(chain.utxo)}")
-        except (KeyboardInterrupt, asyncio.CancelledError):
-            pass
+                      f"交易池 {len(node.mempool)}  UTXO {len(chain.utxo)}", flush=True)
         finally:
+            # 不吞掉 CancelledError / KeyboardInterrupt：让它们继续向上冒泡，
+            # 清理与落盘放在 finally 里，保证 Ctrl+C 也能存下图
             await node.stop()
             workspace.save_chain(node.chain)
-            print(f"[{args.name}] 已停止，链已保存到 {workspace.chain_path}")
+            print(f"[{args.name}] 已停止，链已保存到 {workspace.chain_path}", flush=True)
         return 0
 
     return asyncio.run(run())
