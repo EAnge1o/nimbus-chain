@@ -3,7 +3,7 @@
 [![ci](https://github.com/EAnge1o/nimbus-chain/actions/workflows/ci.yml/badge.svg)](https://github.com/EAnge1o/nimbus-chain/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org/)
 [![Dependency](https://img.shields.io/badge/runtime%20deps-none%20%28stdlib%20only%29-informational.svg)](https://docs.python.org/3/library/)
-[![Tests](https://img.shields.io/badge/tests-343%20passing-brightgreen.svg)](#测试)
+[![Tests](https://img.shields.io/badge/tests-349%20passing-brightgreen.svg)](#测试)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **NimbusChain** 是一个**零第三方运行时依赖**、从零实现的区块链。SHA-256、RIPEMD-160、
@@ -27,7 +27,7 @@ SPV 轻客户端、P2P gossip —— 全部手写，只使用 Python 标准库�
 
 | 你可能想知道 | 直接看这里 |
 |---|---|
-| 能跑起来吗？ | `python -m unittest discover -s tests -t . -v` —— 343 个用例，约 11 秒，**不需要 pip install** |
+| 能跑起来吗？ | `python -m unittest discover -s tests -t . -v` —— 349 个用例，约 16 秒，**不需要 pip install** |
 | 核心机制在哪演示？ | `python demo.py` —— 50 项断言当场自校验：重组、难度钳制、篡改检测一次看完 |
 | 那个应用长什么样？ | 上图；或 `python -m nimbus_chain serve --open` 自己点一遍 |
 | 最硬的技术点是什么？ | 按**累计工作量**（而非链长）重组、真 sighash + 栈式脚本解释器、SPV 独立重算难度 —— 见 [docs/design.md](docs/design.md) |
@@ -186,7 +186,7 @@ python demo.py
 要求 Python 3.10+，**无需安装任何第三方依赖**（连 `pip install` 都不需要）。
 
 ```bash
-# 1) 跑完整测试套件（343 个用例）
+# 1) 跑完整测试套件（349 个用例）
 python -m unittest discover -s tests -t . -v
 
 # 2) 一条命令看完整个项目（含 50 项自断言）
@@ -334,7 +334,7 @@ nimbus-chain/
 │   ├── cli.py          # 命令行入口
 │   ├── __init__.py     # 模块地图
 │   └── __main__.py     # python -m nimbus_chain
-├── tests/              # 12 个测试文件，343 个用例
+├── tests/              # 13 个测试文件，349 个用例
 ├── benchmarks/
 │   ├── bench_crypto.py # 纯 Python vs hashlib、ECDSA/脚本验证耗时
 │   └── bench_pow.py    # 挖矿速率、难度对照表、区块验证吞吐、存储量对比
@@ -355,7 +355,7 @@ nimbus-chain/
 
 ```bash
 python -m unittest discover -s tests -t . -v
-# Ran 343 tests in ~11s  —— OK
+# Ran 349 tests in ~16s  —— OK
 ```
 
 覆盖范围（每个文件都对应一组可被追问的命题）：
@@ -374,6 +374,7 @@ python -m unittest discover -s tests -t . -v
 | `test_notary.py` | 26 | 摘要就是 `SHA-256`；OP_RETURN 载荷正确；**改一字节/翻一个 bit 验证必失败**；区分「未找到 / 仅在交易池 / 已确认」；SPV 验证与全节点结论一致；未同步的轻客户端无法独立证实 |
 | `test_p2p.py` | 19 | **真实 TCP 双节点同步**；交易传播与经第三个节点**中转**；**孤儿块挂起与递归解开**；无效 PoW 永不入孤儿池；**同高度不同分支用定位器互相发现**；**分叉按累计工作量重组**；不同创世块的网络被断开；重复 stop 安全 |
 | `test_server.py` | 33 | 真实启动 HTTP 服务并请求全部端点；存证→验证→篡改三连；SPV 证明端点；无钱包时返回 503；404/400/413 与 HEAD 行为 |
+| `test_console.py` | 6 | **在 `PYTHONIOENCODING=cp1252` 的子进程里跑 `demo.py` 与 CLI**：复现并挡住「CI 上 Windows 因非 UTF-8 控制台抛 `UnicodeEncodeError`」这个真实事故 |
 
 ## 性能基准
 
@@ -463,7 +464,7 @@ Merkle 根（4096 叶）                 213 次/秒          路径 206 次/秒
 **可验证性（现场可复现的命令）**
 
 ```bash
-python -m unittest discover -s tests -t . -v         # 343 个用例
+python -m unittest discover -s tests -t . -v         # 349 个用例
 python demo.py                                       # 50 项断言，全程自校验
 python benchmarks/bench_crypto.py                    # 纯实现 vs 快路径
 python benchmarks/bench_pow.py                       # 难度对照 / 挖矿 / 验证吞吐

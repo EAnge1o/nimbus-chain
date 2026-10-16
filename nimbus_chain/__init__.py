@@ -22,4 +22,29 @@
 __version__ = "0.1.0"
 __author__ = "EAnge1o"
 
-__all__ = ["__version__"]
+__all__ = ["__version__", "enable_utf8_console"]
+
+import sys as _sys
+
+
+def enable_utf8_console() -> None:
+    """把 stdout / stderr 切到 UTF-8 + 出错替换。
+
+    本项目的输出里全是中文，还有 ``✔`` / ``✘`` 这类记号。而在 CI 或输出被重定向
+    的场景下，Windows 上 Python 的 stdout 会退回 cp1252 / cp437 这类本地编码，
+    于是 ``print`` 一句中文就会抛 ``UnicodeEncodeError``，把整个脚本打断。
+
+    交互式终端本来就是 UTF-8（Windows 上 Python 直接走 WriteConsoleW），所以这里
+    只在编码确实不是 UTF-8 时才动手，不影响正常终端体验。
+    """
+    for stream in (_sys.stdout, _sys.stderr):
+        encoding = (getattr(stream, "encoding", "") or "").replace("-", "").lower()
+        if encoding in ("utf8", ""):
+            continue
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (ValueError, OSError):     # pragma: no cover - 流不可重配
+            pass

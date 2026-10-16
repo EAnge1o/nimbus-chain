@@ -109,7 +109,7 @@ UTXO 的 key 在分支间撞车。真实矿工靠 extranonce 解决，我们用
 ## 可验证性（答辩现场可复现的证据）
 
 ```bash
-# 1) 343 个单元测试全绿（约 11 秒）
+# 1) 349 个单元测试全绿（约 16 秒）
 python -m unittest discover -s tests -t . -v
 
 # 2) 一条命令跑完整个项目：50 项断言当场自校验
@@ -161,11 +161,12 @@ python -m nimbus_chain --data-dir n2 --coinbase-maturity 1 node --name n2 --port
 | `test_nodes_on_different_networks_are_disconnected` | 创世块不同 => 不同网络，立刻断开 |
 | `test_tampered_document_fails_verification` | **改一个字节 => 存证验证失败** |
 | 全套 `test_server.py` | 真实启动 HTTP 服务，存证/验证/SPV 端点可用 |
+| `test_console.py` | 在 cp1252 等非 UTF-8 控制台下 `demo.py` 与 CLI 仍能正常输出中文 —— CI Windows 那个真实事故的回归测试 |
 
 ## 答辩演示脚本（建议顺序，约 4 分钟）
 
 ```bash
-# ① 先跑测试，建立可信度（11 秒）
+# ① 先跑测试，建立可信度（16 秒）
 python -m unittest discover -s tests -t . -v
 
 # ② 一条命令看完全部核心机制，50 项断言自校验
@@ -270,5 +271,5 @@ RBF/CPFP、没有地址簿与节点发现、挖矿没做隔离。这些是**范�
 
 ## 技术栈
 
-Python 3.10+ / **仅标准库**；`unittest`（343 个用例，约 11 秒）；
+Python 3.10+ / **仅标准库**；`unittest`（349 个用例，约 16 秒）；
 GitHub Actions 在 Ubuntu 与 Windows 上跑 Python 3.10 / 3.12 / 3.13。

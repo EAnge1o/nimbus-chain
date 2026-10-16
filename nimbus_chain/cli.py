@@ -20,6 +20,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import enable_utf8_console
 from .chain import Chain, ChainParams, InvalidBlock
 from .mempool import Mempool, MempoolError
 from .node import FullNode, NodeConfig, NodeError
@@ -468,6 +469,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    enable_utf8_console()      # 输出被重定向时 Windows 会退回 cp1252，中文会抛异常
     parser = build_parser()
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
     try:

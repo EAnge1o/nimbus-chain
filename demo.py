@@ -24,6 +24,7 @@ from __future__ import annotations
 import hashlib
 import sys
 
+from nimbus_chain import enable_utf8_console
 from nimbus_chain.block import bits_to_target, block_work, mine, target_to_bits
 from nimbus_chain.chain import Chain, ChainParams, InvalidBlock
 from nimbus_chain.crypto import hash256, ripemd160, sha256, sha256_pure
@@ -518,6 +519,7 @@ def demo_commands() -> None:
 
 
 def main() -> int:
+    enable_utf8_console()      # CI / 重定向下 stdout 可能是 cp1252，否则打印中文会崩
     print("NimbusChain —— 零第三方依赖、从零实现的区块链 + 存证应用")
     print("演示参数：coinbase 成熟度 1（默认 100）；重组段单独用 retarget_interval=2")
     demo_cryptography()
