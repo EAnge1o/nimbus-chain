@@ -514,7 +514,9 @@ PAGE_HTML = """<!DOCTYPE html>
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
+  html { overflow-x: hidden; }
+  body { margin: 0; background: var(--bg); color: var(--text); min-width: 0;
+         overflow-x: hidden;   /* 兜底：页面永不横向滚动（宽内容都装在自己的滚动容器里） */
          font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
   header { padding: 22px 28px 14px; border-bottom: 1px solid var(--line); }
   h1 { margin: 0 0 6px; font-size: 21px; letter-spacing: .3px; }
@@ -524,10 +526,10 @@ PAGE_HTML = """<!DOCTYPE html>
   h2 { font-size: 15px; margin: 0 0 10px; color: var(--accent2);
        text-transform: uppercase; letter-spacing: .8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
   .card .k { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
   .card .v { font-family: var(--mono); font-size: 17px; margin-top: 6px; word-break: break-all; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
   textarea { width: 100%; min-height: 130px; background: var(--panel2); color: var(--text);
              border: 1px solid var(--line); border-radius: 8px; padding: 10px;
              font-family: var(--mono); font-size: 13px; resize: vertical; }
@@ -546,11 +548,16 @@ PAGE_HTML = """<!DOCTYPE html>
   .verdict .why { color: var(--dim); margin-top: 6px; }
   dl.meta { display: grid; grid-template-columns: 116px 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 12px; }
   dl.meta dt { color: var(--dim); }
-  dl.meta dd { margin: 0; font-family: var(--mono); word-break: break-all; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line); }
+  dl.meta dd { margin: 0; font-family: var(--mono); word-break: break-all; min-width: 0; }
+  /* 表格只能在自己内部横向滚动，绝不能把整个页面撑宽。
+     table-layout: fixed + width:100% 保证表格物理上不可能超出容器，
+     长哈希/长地址在窄屏下换行显示，而不是把页面撑出横向滚动条。 */
+  .table-wrap { overflow-x: auto; max-width: 100%; min-width: 0; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line);
+           overflow-wrap: anywhere; }
   th { color: var(--dim); font-weight: 600; font-size: 11px; text-transform: uppercase; }
-  td.mono, span.mono { font-family: var(--mono); }
+  td.mono, span.mono { font-family: var(--mono); word-break: break-all; }
   tr.detail td { background: var(--panel2); }
   .tag { font-family: var(--mono); font-size: 11px; padding: 1px 6px; border-radius: 5px;
          border: 1px solid var(--line); color: var(--accent2); }
@@ -561,6 +568,20 @@ PAGE_HTML = """<!DOCTYPE html>
            border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px;
            font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; }
   #toast.show { opacity: 1; }
+
+  /* 窄屏（手机 / 截图窄视口）：收紧内边距，让统计卡与表格不再溢出 */
+  @media (max-width: 700px) {
+    header { padding: 18px 16px 12px; }
+    h1 { font-size: 17px; }
+    header p { font-size: 12px; }
+    main { padding: 16px 14px 48px; }
+    .grid { grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: 8px; }
+    .panel { padding: 14px; }
+    .card { padding: 10px 12px; }
+    .card .v { font-size: 15px; }
+    dl.meta { grid-template-columns: 92px 1fr; }
+    button { padding: 8px 11px; font-size: 12.5px; margin: 6px 6px 0 0; }
+  }
 </style>
 </head>
 <body>
@@ -607,25 +628,25 @@ PAGE_HTML = """<!DOCTYPE html>
 
   <section>
     <h2>最近区块</h2>
-    <table id="blocks"><thead><tr>
+    <div class="table-wrap"><table id="blocks"><thead><tr>
       <th>高度</th><th>区块哈希</th><th>交易</th><th>时间戳</th><th>难度</th><th>nonce</th><th>大小</th>
-    </tr></thead><tbody></tbody></table>
+    </tr></thead><tbody></tbody></table></div>
   </section>
 
   <section>
     <h2>链上存证记录</h2>
-    <table id="anchors"><thead><tr>
+    <div class="table-wrap"><table id="anchors"><thead><tr>
       <th>摘要 (SHA-256)</th><th>交易</th><th>高度</th><th>确认数</th>
-    </tr></thead><tbody></tbody></table>
+    </tr></thead><tbody></tbody></table></div>
   </section>
 
   <section>
     <h2>交易池</h2>
     <div class="panel">
       <div id="mempoolStats" class="muted" style="font-size:13px"></div>
-      <table id="mempool"><thead><tr>
+      <div class="table-wrap"><table id="mempool"><thead><tr>
         <th>交易</th><th>手续费</th><th>聪/字节</th><th>输入</th><th>输出</th>
-      </tr></thead><tbody></tbody></table>
+      </tr></thead><tbody></tbody></table></div>
       <button onclick="mine()">立刻挖一个块</button>
     </div>
   </section>
