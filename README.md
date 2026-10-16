@@ -93,12 +93,13 @@ python demo.py
 
 ![最近区块与链上存证记录](docs/screenshot-blocks.png)
 
-## 为什么是它
+## 项目定位
 
-仓库里已经有了从零实现的系统底座（`nimbus-kv` 的 Raft 一致性、`nimbus-db` 的 SQL
-引擎与 WAL、`nimbus-git` 的内容寻址、`nimbus-vm` 的字节码虚拟机）和应用层项目
-（RAG 学习助手、面试陪练、校园交易平台）。**缺的是「密码学 + 分布式账本」这一块**，
-而它恰恰是评委最容易追问、也最难含糊过去的领域。
+本项目聚焦**密码学 + 分布式账本**：SHA-256、RIPEMD-160、secp256k1 ECDSA、Merkle 证明、
+栈式脚本解释器、PoW 与难度重定目标、SPV 轻客户端全部手写，只使用 Python 标准库。
+
+同系列的从零实现项目：[nimbus-kv](https://github.com/EAnge1o/nimbus-kv)（Raft 一致性）、[nimbus-db](https://github.com/EAnge1o/nimbus-db)（SQL 引擎与 WAL）、
+[nimbus-git](https://github.com/EAnge1o/nimbus-git)（内容寻址）、[nimbus-vm](https://github.com/EAnge1o/nimbus-vm)（字节码虚拟机）。
 
 更关键的是：区块链项目最容易做成"调用 `web3.py` 发一笔交易"。这个仓库反过来，
 把**链本身**当作研究对象——不留任何一行第三方库可以藏身的地方。
@@ -341,7 +342,7 @@ nimbus-chain/
 ├── demo.py             # 自校验端到端演示（50 项断言）
 ├── docs/
 │   ├── design.md       # 分层设计、数据结构、sighash/重组/难度细节
-│   ├── competition.md  # 答辩材料：定位、创新点、证据、演示脚本、追问应答
+│   ├── competition.md  # 深度说明：定位、创新点、证据、演示脚本、常见问题
 │   ├── screenshot-explorer.png        # 浏览器页面（真实截图，非设计稿）
 │   ├── screenshot-verify-vs-tamper.png  # 原文件通过 vs 改一个字节后失败
 │   ├── screenshot-blocks.png          # 区块与存证记录列表
@@ -358,7 +359,7 @@ python -m unittest discover -s tests -t . -v
 # Ran 349 tests in ~16s  —— OK
 ```
 
-覆盖范围（每个文件都对应一组可被追问的命题）：
+覆盖范围（每个文件对应一组可独立验证的命题）：
 
 | 测试文件 | 用例 | 证明的命题 |
 |---|---|---|
@@ -444,7 +445,7 @@ Merkle 根（4096 叶）                 213 次/秒          路径 206 次/秒
 > 与 Bitcoin Core 的可比性有限（那是生产级实现，本项目是教学实现），
 > 但在「脚本解释器 / 难度调整 / 工作量重组 / SPV」这四项上，二者遵循同一套规则。
 
-## 竞赛答辩定位
+## 技术亮点
 
 **一句话**：一条零依赖、从零实现的区块链，共识规则全部可验证，并在其上跑了一个
 真实可用的文档存证应用。
@@ -453,7 +454,7 @@ Merkle 根（4096 叶）                 213 次/秒          路径 206 次/秒
 
 1. **密码学原语全部手写**，且与权威向量逐字节可比对：SHA-256 的填充边界、
    RIPEMD-160 的 8 组官方向量、secp256k1 的 2G/3G 已知点、**RFC 6979 的
-   Satoshi Nakamoto 向量**。评委可以当场要求改一行代码看测试是否变红。
+   Satoshi Nakamoto 向量**。可以当场改一行代码看测试是否变红。
 2. **真 sighash + 栈式解释器**，而不是"对哈希签个名"：脚本被执行、栈被操作、
    P2SH 两阶段执行、多签连 off-by-one 都兼容。
 3. **按累计工作量重组**，而不是"最长链"：短而高难度的分支能击败长而低难度的分支；
@@ -471,7 +472,7 @@ python benchmarks/bench_pow.py                       # 难度对照 / 挖矿 / �
 python -m nimbus_chain serve --open                  # 浏览器里现场"篡改一个字节"
 ```
 
-**最容易被追问、也最容易翻车的三点**（`docs/competition.md` 里有完整的逐条应答）
+**最容易出错的三点**（`docs/competition.md` 里有完整的逐条应答）
 
 1. **sighash 的序列化细节**：清空哪些脚本、填回哪个 scriptCode、拼什么后缀。
 2. **重组回滚的 UTXO 与交易池还原**：为什么比的是累计工作量、coinbase 成熟度怎么处理。
@@ -479,7 +480,7 @@ python -m nimbus_chain serve --open                  # 浏览器里现场"篡改
 
 详见 [docs/design.md](docs/design.md) 与 [docs/competition.md](docs/competition.md)。
 
-## 局限与边界（显示你知道边界在哪）
+## 局限与边界
 
 - **不是生产级实现**：不做 SegWit / Taproot、不做 RBF/CPFP、不实现签名缓存与区块
   weight；只支持 `SIGHASH_ALL`。
