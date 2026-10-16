@@ -19,6 +19,26 @@ SPV 轻客户端、P2P gossip —— 全部手写，只使用 Python 标准库�
 > client, asyncio P2P gossip, and a tamper-evident notarisation application.
 > **Zero third-party dependencies.**
 
+![NimbusChain · 链浏览器与存证验证页面](docs/screenshot-explorer.png)
+
+*（截图是页面真实运行的结果，不是设计稿；链上 8 个区块、3 条存证记录都真实存在。）*
+
+### 30 秒看懂这个项目
+
+| 你可能想知道 | 直接看这里 |
+|---|---|
+| 能跑起来吗？ | `python -m unittest discover -s tests -t . -v` —— 343 个用例，约 11 秒，**不需要 pip install** |
+| 核心机制在哪演示？ | `python demo.py` —— 50 项断言当场自校验：重组、难度钳制、篡改检测一次看完 |
+| 那个应用长什么样？ | 上图；或 `python -m nimbus_chain serve --open` 自己点一遍 |
+| 最硬的技术点是什么？ | 按**累计工作量**（而非链长）重组、真 sighash + 栈式脚本解释器、SPV 独立重算难度 —— 见 [docs/design.md](docs/design.md) |
+| 会不会是抄的/包装的？ | 密码学原语全部手写，并与 NIST / RIPEMD / RFC 6979 官方向量**逐字节**比对 —— 见 [docs/competition.md](docs/competition.md) |
+
+**存证应用的核心命题：改一个字节，肉眼几乎看不出，但链上再也验不过。**
+
+![原文件验证通过 vs 改一个字节后验证失败](docs/screenshot-verify-vs-tamper.png)
+
+![存证 → 篡改 → 验证失败](docs/demo-notarize.gif)
+
 ---
 
 ## 两分钟现场演示
@@ -66,7 +86,12 @@ python demo.py
 ```
 
 浏览器里还有一条更直观的演示路径：`python -m nimbus_chain serve --open`，
-页面上点「存证上链」→「验证」→「篡改一个字节后验证」，红色失败会当场出现。
+页面上点「存证上链」→「验证」→「篡改一个字节后验证」，红色失败会当场出现
+（上面那两张对比图就是这么来的）。
+
+链上数据也是直接看得见的——每个区块的交易、`OP_RETURN` 载荷与 Merkle 路径长度都会列出来：
+
+![最近区块与链上存证记录](docs/screenshot-blocks.png)
 
 ## 为什么是它
 
@@ -316,7 +341,11 @@ nimbus-chain/
 ├── demo.py             # 自校验端到端演示（50 项断言）
 ├── docs/
 │   ├── design.md       # 分层设计、数据结构、sighash/重组/难度细节
-│   └── competition.md  # 答辩材料：定位、创新点、证据、演示脚本、追问应答
+│   ├── competition.md  # 答辩材料：定位、创新点、证据、演示脚本、追问应答
+│   ├── screenshot-explorer.png        # 浏览器页面（真实截图，非设计稿）
+│   ├── screenshot-verify-vs-tamper.png  # 原文件通过 vs 改一个字节后失败
+│   ├── screenshot-blocks.png          # 区块与存证记录列表
+│   └── demo-notarize.gif              # 存证 → 篡改 → 验证失败的动画
 ├── .github/workflows/ci.yml   # Ubuntu + Windows × Python 3.10/3.12/3.13
 ├── pyproject.toml
 └── LICENSE
