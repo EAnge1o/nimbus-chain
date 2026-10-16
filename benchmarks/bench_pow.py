@@ -18,6 +18,7 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from nimbus_chain import enable_utf8_console  # noqa: E402
 from nimbus_chain.block import (  # noqa: E402
     Block,
     BlockHeader,
@@ -74,6 +75,7 @@ def mine_one(bits: int, budget: float) -> tuple[int, float, bool]:
 
 
 def main() -> int:
+    enable_utf8_console()      # 输出被重定向时 Windows 会退回 cp1252，打印中文会崩
     parser = argparse.ArgumentParser(description="NimbusChain PoW 基准")
     parser.add_argument("--time", type=float, default=0.5, help="每项测量时长（秒）")
     parser.add_argument("--rounds", type=int, default=24, help="挖矿采样轮数")

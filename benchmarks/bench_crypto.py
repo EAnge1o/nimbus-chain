@@ -17,6 +17,7 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from nimbus_chain import enable_utf8_console  # noqa: E402
 from nimbus_chain.crypto import (  # noqa: E402
     b58check_encode,
     b58decode,
@@ -56,6 +57,7 @@ def per_second(func, *, min_time: float) -> float:
 
 
 def main() -> int:
+    enable_utf8_console()      # 输出被重定向时 Windows 会退回 cp1252，打印中文会崩
     parser = argparse.ArgumentParser(description="NimbusChain 密码学基准")
     parser.add_argument("--time", type=float, default=0.3, help="每项测量的最短时长（秒）")
     args = parser.parse_args()
